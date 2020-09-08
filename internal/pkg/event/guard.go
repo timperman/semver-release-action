@@ -13,7 +13,7 @@ import (
 func GuardCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:  "guard [RELEASE_BRANCH] [GH_EVENT_PATH]",
-		Args: cobra.ExactArgs(2),
+		Args: cobra.ExactArgs(3),
 		Run:  executeGuard,
 	}
 }
@@ -29,12 +29,13 @@ func IncrementCommand() *cobra.Command {
 func executeGuard(cmd *cobra.Command, args []string) {
 	releaseBranch := args[0]
 	event := parseEvent(cmd, args[1])
+	releaseStrategy := args[2]
 
-	if event.Action == nil || *event.Action != "closed" {
+	if releaseStrategy != "none" && (event.Action == nil || *event.Action != "closed") {
 		action.Skip(cmd, "pull request not closed")
 	}
 
-	if event.PullRequest.Merged == nil || !*event.PullRequest.Merged {
+	if releaseStrategy != "none" && (event.PullRequest.Merged == nil || !*event.PullRequest.Merged) {
 		action.Skip(cmd, "pull request not merged")
 	}
 
